@@ -23,14 +23,14 @@ import { ProfitCalcParamsUS, FinalProfitDetailUS } from 'types/profitCalc';
  */
 export function calculateFinalProfitDetailUS({
   sellingPrice, //USD
-  costPrice, //JPY
+  costPrice = 0, //JPY
   shippingJPY, //JPY
-  categoryFeePercent, //%
+  categoryFeePercent = 0, //%
   paymentFeePercent, //%
   exchangeRateUSDtoJPY,
 
 }: ProfitCalcParamsUS): FinalProfitDetailUS {
-  console.log("利益計算に渡すcategoryFeePercent:", categoryFeePercent);
+   // console.debug("categoryFeePercent:", categoryFeePercent);
   if (!exchangeRateUSDtoJPY) {
     throw new Error("exchangeRateUSDtoJPY が必要です！");
   }
@@ -98,7 +98,6 @@ export function calculateFinalProfitDetailUS({
     payoneerFeeUSD,
     exchangeAdjustmentJPY,
     feeRebateJPY,
-    categoryFeeUSD,
     sellingPrice,
     sellingPriceInclTax,
     paymentFeeUSD,

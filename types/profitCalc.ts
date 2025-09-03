@@ -2,9 +2,9 @@
 
 export interface ProfitCalcParamsUS {
     sellingPrice: number; //USD
-    costPrice: number; //JPY
+    costPrice?: number; //JPY（未指定なら 0 扱い）
     shippingJPY: number; //JPY
-    categoryFeePercent: number; // %
+    categoryFeePercent?: number; // 省略時は0扱いにする
     paymentFeePercent: number; //%
     exchangeRateUSDtoJPY: number;
     targetMargin?: number;
@@ -16,7 +16,6 @@ export interface FinalProfitDetailUS {
     feeTaxUSD: number;              // 手数料Tax (USD)
     exchangeAdjustmentJPY: number;  // USD→JPYでの調整額 (JPY)
     feeRebateJPY: number;
-    categoryFeeUSD: number;
     payoneerFeeUSD: number;
     netProfitJPY: number;
     profitJPY: number;

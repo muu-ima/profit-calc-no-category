@@ -8,7 +8,6 @@ import ExchangeRate from "./components/ExchangeRate";
 import Result from "./components/Result";
 import {
   calculateFinalProfitDetailUS,
-  calculateCategoryFeeUS,
   calculateActualCost,
   calculateGrossProfit,
   calculateProfitMargin,
@@ -24,12 +23,6 @@ import { AnimatePresence, motion } from "framer-motion";
 type ShippingResult = {
   method: string;
   price: number | null;
-};
-
-type CategoryFeeType = {
-  label: string;
-  value: number;
-  categories: string[];
 };
 
 type ShippingMode = 'auto' | 'manual';
@@ -58,10 +51,6 @@ export default function Page() {
     height: 0,
   });
   const [rate, setRate] = useState<number | null>(null);
-  const [categoryOptions, setCategoryOptions] = useState<CategoryFeeType[]>([]);
-  const [selectedCategoryFee, setSelectedCategoryFee] = useState<number | "">(
-    ""
-  );
 
   const [shippingMode, setShippingMode] = useState<ShippingMode>('auto');
   const [manualShipping, setManualShipping] = useState<number | ''>('');
@@ -70,6 +59,7 @@ export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("breakEven");
   const [be, setBe] = useState<BreakEvenResult | null>(null);
+
 
   // 自動/手動の送料を一元化
   const selectedShippingJPY: number | null =
@@ -83,13 +73,6 @@ export default function Page() {
     fetch("/data/shipping.json")
       .then((res) => res.json())
       .then((data) => setShippingRates(data));
-  }, []);
-
-  // カテゴリ手数料のマスタ読み込み
-  useEffect(() => {
-    fetch("/data/categoryFees.json")
-      .then((res) => res.json())
-      .then((data) => setCategoryOptions(data));
   }, []);
 
   // レートのログ
@@ -115,8 +98,7 @@ export default function Page() {
     const ready =
       rate !== null &&
       costPrice !== "" &&
-      selectedShippingJPY !== null &&
-      selectedCategoryFee !== "";
+      selectedShippingJPY !== null;
 
     if (!ready) {
       setBe(null); // 計算結果をリセットして終了
@@ -127,7 +109,7 @@ export default function Page() {
       costJPY: Number(costPrice),
       shippingJPY: selectedShippingJPY,
       rateJPYperUSD: rate!,
-      categoryFeePercent: Number(selectedCategoryFee),
+      categoryFeePercent: 0,
       exchangeFeeJPYPerUSD: 3.3,
     });
 
@@ -142,17 +124,17 @@ export default function Page() {
       return;
     }
     setBe(out);
-  }, [costPrice, rate, selectedCategoryFee, selectedShippingJPY]);
+  }, [costPrice, rate, selectedShippingJPY]);
 
   // 計算結果用のuseEffect - 未入力は計算しない
   useEffect(() => {
+    // auto時はweight必須、manual時は不要
     const ready =
       sellingPrice !== "" &&
       costPrice !== "" &&
       rate !== null &&
-      weight !== null &&
-      selectedCategoryFee !== "" &&
       selectedShippingJPY !== null;
+    (shippingMode === 'auto' ? weight !== null : true);
 
     if (!ready) {
       setCalcResult(null);
@@ -163,10 +145,9 @@ export default function Page() {
     const shippingJPY: number = selectedShippingJPY;
     const sellingPriceUSD: number = parseFloat(sellingPrice);         // 文字列を数値へ
     const sellingPriceJPY: number = sellingPriceUSD * rate!;
-    const categoryFeeJPY: number = calculateCategoryFeeUS(
-      sellingPriceJPY,
-      Number(selectedCategoryFee)
-    );
+    // カテゴリ手数料は廃止（常に0）
+    const categoryFeeJPY: number = 0;
+
 
     //実費合計
     const actualCost: number = calculateActualCost(
@@ -176,10 +157,10 @@ export default function Page() {
     );
 
     const grossProfit: number = calculateGrossProfit(
-      sellingPriceUSD, actualCost
+      sellingPriceJPY, actualCost
     );
     const profitMargin: number = calculateProfitMargin(
-      grossProfit, sellingPriceUSD
+      grossProfit, sellingPriceJPY
     );
 
     setCalcResult({
@@ -198,7 +179,6 @@ export default function Page() {
     costPrice,
     rate,
     weight,
-    selectedCategoryFee,
     selectedShippingJPY,   // ← 依存にこれを入れる
     shippingMode,
     result?.method
@@ -207,13 +187,14 @@ export default function Page() {
   const stateTaxRate = 0.0671;
   const sellingPriceNum = sellingPrice !== "" ? parseFloat(sellingPrice) : 0;
   const sellingPriceInclTax = sellingPriceNum + sellingPriceNum * stateTaxRate;
+  const costPriceNum = typeof costPrice === "number" ? costPrice : 0; // ★追加
 
   const final = calcResult
     ? calculateFinalProfitDetailUS({
       sellingPrice: sellingPriceNum,
-      costPrice: typeof costPrice === "number" ? costPrice : 0,
       shippingJPY: calcResult.shippingJPY,
-      categoryFeePercent: selectedCategoryFee as number,
+      costPrice: costPriceNum, 
+      categoryFeePercent: 0,
       paymentFeePercent: 1.35, //決済手数料(%)
       exchangeRateUSDtoJPY: rate ?? 0,
       targetMargin: 0.30,
@@ -225,8 +206,7 @@ export default function Page() {
     sellingPrice !== "" &&
     costPrice !== "" &&
     rate !== null &&
-    weight !== null &&
-    selectedCategoryFee !== "";
+    selectedShippingJPY !== null;
 
   // BEの表示値(モード切替対応)
   const currentUSD = useMemo(() => {
@@ -440,21 +420,7 @@ export default function Page() {
           </motion.div>
         </AnimatePresence>
 
-        <div>
-          <label className="block font-semibold mb-1">カテゴリ手数料 </label>
-          <select
-            value={selectedCategoryFee}
-            onChange={(e) => setSelectedCategoryFee(Number(e.target.value))}
-            className="w-full px-3 py-2 border rounded-md"
-          >
-            <option value="">カテゴリを選択してください</option>
-            {categoryOptions.map((cat) => (
-              <option key={cat.label} value={cat.value}>
-                {cat.label} ({cat.value}%)
-              </option>
-            ))}
-          </select>
-        </div>
+
       </div>
       {/* 右カラム */}
       <div className="flex-1 flex flex-col space-y-4">
@@ -553,9 +519,8 @@ export default function Page() {
         {/* 利益結果 */}
         {rate !== null && sellingPrice !== "" && (
           <Result
-            originalPriceUSD={sellingPrice !== "" ? parseFloat(sellingPrice) : 0}  // ★ 修正
-            priceJPY={typeof sellingPrice === "number" && rate !== null ? sellingPrice * rate : 0}
-            sellingPriceInclTax={sellingPriceInclTax}
+            originalPriceUSD={sellingPrice !== "" ? parseFloat(sellingPrice) : 0}
+            priceJPY={sellingPrice !== "" && rate !== null ? Math.round(parseFloat(sellingPrice) * rate) : 0} sellingPriceInclTax={sellingPriceInclTax}
             exchangeRateUSDtoJPY={rate ?? 0}
             calcResult={calcResult}
           />
