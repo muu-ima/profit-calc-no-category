@@ -32,7 +32,6 @@ export default function FinalResult({
         <div className="border-t border-gray-300 my-2" />
 
         <p className="text-gray-600 font-semibold my-1">【州税込売上から計算】</p>
-        <p>■ カテゴリ手数料 : ${data.categoryFeeUSD.toFixed(2)} / ￥{Math.round(data.categoryFeeUSD * exchangeRateUSDtoJPY).toLocaleString()}</p>
         <p>■ 決済手数料 : ${data.paymentFeeUSD.toFixed(2)} / ￥{Math.round(data.paymentFeeUSD * exchangeRateUSDtoJPY).toLocaleString()}</p>
         <p>■ 手数料税 : ${data.feeTaxUSD.toFixed(2)} / ￥{Math.round(data.feeTaxUSD * exchangeRateUSDtoJPY).toLocaleString()}</p>
         <p>■ payoneer手数料 : ${data.payoneerFeeUSD.toFixed(2)} / ￥{Math.round(data.payoneerFeeUSD * exchangeRateUSDtoJPY).toLocaleString()}</p>
