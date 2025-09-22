@@ -18,7 +18,8 @@
     // ★ ここを外側に（ネストしない）
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/components/*": ["src/app/components/*"]
     }
   },
   "include": [
