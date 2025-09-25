@@ -236,7 +236,7 @@ export default function Page() {
         </div>
       </div>
 
-      {/* 右 5/12 */}
+      {/* 右 6/12 */}
       <div className="md:col-span-6 min-w-0 flex flex-col space-y-4">
         {/* 表示モード：左auto / 右1fr */}
         <div className="grid grid-cols-[auto,1fr] items-center gap-3 w-full">
