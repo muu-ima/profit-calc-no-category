@@ -31,7 +31,7 @@ export default function ModeSwitch({
 
     return (
         <div
-            className="w-full max-w-md"
+            className="w-full max-w-xl shrink-0"
             role="tablist"
             aria-label="価格表示モード"
             onKeyDown={onKeyDown}
