@@ -124,10 +124,23 @@ export default function Page() {
     return Math.round(beUSD * rate);
   }, [beUSD, rate]);
 
-  return (
-    <div className="py-4 md:grid md:grid-cols-12 gap-8 space-y-8 md:space-y-0">
-      {/* 左66/12 */}
-      <div className="md:col-span-6 min-w-0 flex flex-col space-y-4">
+return (
+  <div className="py-4">
+    {/* タイトル（全幅） */}
+    <div className="mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+        海外発送 利益計算ツール
+      </h1>
+      <p className="text-sm text-gray-500 mt-1">
+        仕入れ値・配送料・為替レートから損益分岐/関税/保険を自動計算します
+      </p>
+    </div>
+
+    {/* 本体レイアウト：モバイル1列 / md以上2列（1:1） */}
+    {/* ✅ 縦方向の余白は grid の gap-y に集約（space-y は使わない） */}
+    <div className="grid grid-cols-1  gap-x-8 md:grid-cols-2">
+      {/* 左列 */}
+      <div className="min-w-0 flex-1 flex-col space-y-4">
         <ExchangeRate onRateChange={setRate} />
 
         <div>
@@ -164,8 +177,8 @@ export default function Page() {
           </button>
         </div>
 
-        {/* 自動/手動 フォーム：min-hで高さ固定寄り（heightアニメ無し） */}
-        <div className="mt-2 rounded-lg  p-3 min-h-[240px]">
+        {/* 自動/手動フォーム */}
+        <div className="mt-2 rounded-lg p-3 min-h-[240px]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={shippingMode}
@@ -236,24 +249,21 @@ export default function Page() {
         </div>
       </div>
 
-      {/* 右 6/12 */}
-      <div className="md:col-span-6 min-w-0 flex flex-col space-y-4">
-        {/* 表示モード：左auto / 右1fr */}
+      {/* 右列 */}
+      <div className="min-w-0 flex-1 flex-col space-y-4">
+        {/* 表示モード */}
         <div className="grid grid-cols-[auto,1fr] items-center gap-3 w-full">
           <span className="font-semibold text-gray-600 whitespace-nowrap">表示モード</span>
           <ModeSwitch mode={mode} onChange={setMode} />
         </div>
 
-        {/* 見出し + 数値（絶対に横幅が動かない 3カラムGrid） */}
+        {/* 見出し + 数値 */}
         {hydrated && beUSD != null ? (
           <div className="rounded-xl border border-gray-200/70 bg-white/60 dark:bg-zinc-900/60 dark:border-zinc-800 p-3">
             <div className="flex items-baseline gap-3 flex-wrap">
-              {/* 見出し（左） */}
               <span className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                 {mode === "breakEven" ? "損益分岐(USD)" : mode === "tariff" ? "関税込合計(USD)" : "保険込み合計(USD)"}:
               </span>
-
-              {/* 金額ペア（右） */}
               <div className="flex items-baseline gap-3 whitespace-nowrap">
                 <span className="tabular-nums text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-gray-100">
                   {beUSD.toFixed(2)}
@@ -270,16 +280,12 @@ export default function Page() {
           <span className="text-gray-500">必要な入力を埋めると自動計算されます</span>
         )}
 
-        {/* 配送結果：固定レイアウトで横伸び抑止 */}
-        {/* 配送結果：1行表示（必要ならペア単位で折り返し） */}
+        {/* 配送結果 */}
         <div className="w-full px-3 py-2 border border-gray-300 rounded-md min-h-[56px] flex flex-wrap items-center gap-x-6 gap-y-1">
-          {/* ペア1: 配送方法 */}
           <div className="flex items-center gap-2 min-w-0">
             <p className="whitespace-nowrap">配送方法:</p>
             <p className="truncate">{result === null ? "計算中..." : result.method}</p>
           </div>
-
-          {/* ペア2: 配送料 */}
           <div className="flex items-center gap-2">
             <p className="whitespace-nowrap">配送料:</p>
             <p className="whitespace-nowrap">
@@ -287,7 +293,6 @@ export default function Page() {
             </p>
           </div>
         </div>
-
 
         {/* 利益結果 */}
         {rate !== null && sellingPrice !== "" && (
@@ -311,8 +316,8 @@ export default function Page() {
           />
         )}
       </div>
-
-      <ChatIcon />
     </div>
-  );
-}
+
+    <ChatIcon />
+  </div>
+)};
