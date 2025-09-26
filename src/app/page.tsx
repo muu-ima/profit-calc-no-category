@@ -129,7 +129,7 @@ return (
     {/* タイトル（全幅） */}
     <div className="mb-6">
       <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-        海外発送 利益計算ツール
+        Shopify-BreakEven
       </h1>
       <p className="text-sm text-gray-500 mt-1">
         仕入れ値・配送料・為替レートから損益分岐/関税/保険を自動計算します
